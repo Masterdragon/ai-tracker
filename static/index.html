@@ -55,39 +55,6 @@
     .refresh-btn:disabled { opacity: .4; cursor: default; }
     #countdown { font-size: 12px; color: var(--muted); }
 
-    /* ── Controls ── */
-    .controls {
-      padding: 20px 32px 0;
-      display: flex; align-items: center; gap: 12px; flex-wrap: wrap;
-    }
-    .search-wrap { position: relative; flex: 1; min-width: 200px; max-width: 380px; }
-    .search-wrap svg { position: absolute; left: 11px; top: 50%; transform: translateY(-50%); opacity: .45; }
-    #search {
-      width: 100%; padding: 9px 12px 9px 36px;
-      background: var(--surface); border: 1px solid var(--border); border-radius: 9px;
-      color: var(--text); font-size: 14px; outline: none;
-      transition: border-color .2s;
-    }
-    #search:focus { border-color: var(--accent); }
-    #search::placeholder { color: var(--muted); }
-    .tag-filters { display: flex; gap: 7px; flex-wrap: wrap; }
-    .tag-btn {
-      padding: 5px 12px; border-radius: 20px; font-size: 12px; font-weight: 500; cursor: pointer;
-      border: 1px solid var(--border); background: var(--surface); color: var(--muted);
-      transition: all .15s;
-    }
-    .tag-btn:hover { border-color: var(--accent); color: var(--text); }
-    .tag-btn.active { background: var(--accent); border-color: var(--accent); color: #fff; }
-
-    /* ── Stats bar ── */
-    .stats-bar {
-      padding: 12px 32px;
-      display: flex; align-items: center; gap: 20px;
-      font-size: 13px; color: var(--muted);
-      border-bottom: 1px solid var(--border);
-    }
-    .stats-bar strong { color: var(--text); }
-    #last-updated { margin-left: auto; }
 
     /* ── Grid ── */
     .grid {
@@ -150,10 +117,69 @@
     }
     @keyframes spin { to { transform: rotate(360deg); } }
 
+    /* ── Filter panel ── */
+    .controls {
+      padding: 16px 32px 0;
+      display: flex; flex-direction: column; gap: 10px;
+      border-bottom: 1px solid var(--border);
+      background: var(--surface);
+    }
+    .search-row { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+    .search-wrap { position: relative; flex: 1; min-width: 200px; max-width: 380px; }
+    .search-wrap svg { position: absolute; left: 11px; top: 50%; transform: translateY(-50%); opacity: .45; }
+    #search {
+      width: 100%; padding: 9px 12px 9px 36px;
+      background: var(--bg); border: 1px solid var(--border); border-radius: 9px;
+      color: var(--text); font-size: 14px; outline: none; transition: border-color .2s;
+    }
+    #search:focus { border-color: var(--accent); }
+    #search::placeholder { color: var(--muted); }
+
+    .clear-btn {
+      padding: 7px 14px; border-radius: 8px; font-size: 12px; font-weight: 600;
+      border: 1px solid #fca5a5; background: #fff1f1; color: #dc2626; cursor: pointer;
+      transition: background .15s; white-space: nowrap;
+    }
+    .clear-btn:hover { background: #fee2e2; }
+
+    .filter-row {
+      display: flex; align-items: flex-start; gap: 10px; padding-bottom: 12px;
+    }
+    .filter-label {
+      font-size: 11px; font-weight: 700; color: var(--muted); text-transform: uppercase;
+      letter-spacing: .6px; padding-top: 6px; min-width: 64px; flex-shrink: 0;
+    }
+    .filter-pills { display: flex; gap: 6px; flex-wrap: wrap; }
+    .pill {
+      padding: 4px 11px; border-radius: 20px; font-size: 12px; font-weight: 500; cursor: pointer;
+      border: 1px solid var(--border); background: var(--bg); color: var(--muted);
+      transition: all .15s;
+    }
+    .pill:hover { border-color: var(--accent); color: var(--text); }
+    .pill.active { background: var(--accent); border-color: var(--accent); color: #fff; }
+
+    /* ── Stats bar ── */
+    .stats-bar {
+      padding: 10px 32px;
+      display: flex; align-items: center; gap: 16px; flex-wrap: wrap;
+      font-size: 13px; color: var(--muted);
+      border-bottom: 1px solid var(--border);
+      background: var(--bg);
+    }
+    .stats-bar strong { color: var(--text); }
+    .active-filters { display: flex; gap: 6px; flex-wrap: wrap; }
+    .active-chip {
+      display: inline-flex; align-items: center; gap: 4px;
+      padding: 2px 8px; border-radius: 20px; font-size: 11px; font-weight: 600;
+      background: rgba(97,65,224,.1); border: 1px solid rgba(97,65,224,.25); color: var(--accent);
+    }
+    #last-updated { margin-left: auto; font-size: 12px; }
+
     /* ── Responsive ── */
     @media (max-width: 600px) {
       header, .controls, .stats-bar, .grid { padding-left: 16px; padding-right: 16px; }
       :root { --card-w: 280px; }
+      .filter-label { min-width: 54px; }
     }
   </style>
 </head>
@@ -174,17 +200,35 @@
 </header>
 
 <div class="controls">
-  <div class="search-wrap">
-    <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-      <circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/>
-    </svg>
-    <input id="search" type="search" placeholder="Search companies…" oninput="renderCompanies()" />
+  <div class="search-row">
+    <div class="search-wrap">
+      <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+        <circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/>
+      </svg>
+      <input id="search" type="search" placeholder="Search companies…" oninput="renderCompanies()" />
+    </div>
+    <button class="clear-btn" id="clearBtn" onclick="clearFilters()" style="display:none">✕ Clear filters</button>
   </div>
-  <div class="tag-filters" id="tagFilters"></div>
+
+  <div class="filter-row">
+    <span class="filter-label">Stage</span>
+    <div class="filter-pills" id="stageFilters"></div>
+  </div>
+
+  <div class="filter-row">
+    <span class="filter-label">Location</span>
+    <div class="filter-pills" id="locationFilters"></div>
+  </div>
+
+  <div class="filter-row">
+    <span class="filter-label">Category</span>
+    <div class="filter-pills" id="tagFilters"></div>
+  </div>
 </div>
 
 <div class="stats-bar">
   <span>Showing <strong id="count">—</strong> companies</span>
+  <div class="active-filters" id="activeFilters"></div>
   <span id="last-updated"></span>
 </div>
 
@@ -232,9 +276,21 @@
 
   // ── State ────────────────────────────────────────────────────────────────
   let allCompanies = [];
-  let activeTag = null;
-  let nextRefreshAt = null;
+  let activeTag      = null;
+  let activeStage    = null;
+  let activeLocation = null;
+  let nextRefreshAt  = null;
   let countdownInterval = null;
+
+  const FUNDING_STAGES = [
+    { label: "Bootstrapped", color: "#e07b20" },
+    { label: "Seed",         color: "#8b5cf6" },
+    { label: "Series A",     color: "#3b82f6" },
+    { label: "Series B",     color: "#0ea5e9" },
+    { label: "Series C",     color: "#06b6d4" },
+    { label: "Late Stage",   color: "#0f9d58" },
+    { label: "Pre-IPO",      color: "#f59e0b" },
+  ];
 
   // ── Fetch + render ───────────────────────────────────────────────────────
   async function fetchCompanies() {
@@ -252,7 +308,9 @@
         startCountdown();
       }
 
-      await fetchTags();
+      buildStageFilters();
+      buildLocationFilters();
+      await buildTagFilters();
       renderCompanies();
     } catch (err) {
       document.getElementById("grid").innerHTML =
@@ -260,39 +318,99 @@
     }
   }
 
-  async function fetchTags() {
+  // ── Stage filters ────────────────────────────────────────────────────────
+  function buildStageFilters() {
+    const container = document.getElementById("stageFilters");
+    container.innerHTML = "";
+    container.appendChild(makePill("All", null, "stage"));
+    FUNDING_STAGES.forEach(s => container.appendChild(makePill(s.label, s.label, "stage", s.color)));
+  }
+
+  // ── Location filters ─────────────────────────────────────────────────────
+  function buildLocationFilters() {
+    const cities = [...new Set(
+      allCompanies
+        .map(c => c.hq ? c.hq.split(",")[0].trim() : null)
+        .filter(Boolean)
+    )].sort();
+
+    const container = document.getElementById("locationFilters");
+    container.innerHTML = "";
+    container.appendChild(makePill("All", null, "location"));
+    cities.forEach(city => container.appendChild(makePill(city, city, "location")));
+  }
+
+  // ── Tag (category) filters ───────────────────────────────────────────────
+  async function buildTagFilters() {
     try {
-      const res = await fetch("/api/tags");
+      const res  = await fetch("/api/tags");
       const tags = await res.json();
       const container = document.getElementById("tagFilters");
       container.innerHTML = "";
-      const allBtn = makeTagBtn("All", null);
-      allBtn.classList.add("active");
-      container.appendChild(allBtn);
-      tags.forEach(tag => container.appendChild(makeTagBtn(tag, tag)));
+      container.appendChild(makePill("All", null, "tag"));
+      tags.forEach(tag => container.appendChild(makePill(tag, tag, "tag")));
     } catch (_) {}
   }
 
-  function makeTagBtn(label, value) {
+  // ── Generic pill factory ─────────────────────────────────────────────────
+  function makePill(label, value, type, accentColor) {
     const btn = document.createElement("button");
-    btn.className = "tag-btn";
+    btn.className = "pill";
     btn.textContent = label;
+    btn.dataset.type  = type;
+    btn.dataset.value = value || "";
+    if (accentColor && value) {
+      btn.style.cssText = `--pill-color:${accentColor}`;
+    }
     btn.onclick = () => {
-      activeTag = value;
-      document.querySelectorAll(".tag-btn").forEach(b => b.classList.remove("active"));
+      // deactivate siblings of same type
+      document.querySelectorAll(`.pill[data-type="${type}"]`)
+              .forEach(b => b.classList.remove("active"));
       btn.classList.add("active");
+
+      if (type === "stage")    activeStage    = value;
+      if (type === "location") activeLocation = value;
+      if (type === "tag")      activeTag      = value;
       renderCompanies();
     };
+    // set initial active on "All" pills
+    if (!value) btn.classList.add("active");
     return btn;
   }
 
+  // ── Render ───────────────────────────────────────────────────────────────
   function renderCompanies() {
     const q = document.getElementById("search").value.toLowerCase().trim();
     let list = allCompanies;
-    if (activeTag) list = list.filter(c => (c.tags || []).includes(activeTag));
-    if (q) list = list.filter(c =>
-      c.name.toLowerCase().includes(q) || c.description.toLowerCase().includes(q)
-    );
+
+    if (activeStage)
+      list = list.filter(c => {
+        const s = fundingStageLabel(c.last_funding);
+        return s && s.label === activeStage;
+      });
+
+    if (activeLocation)
+      list = list.filter(c => c.hq && c.hq.startsWith(activeLocation));
+
+    if (activeTag)
+      list = list.filter(c => (c.tags || []).includes(activeTag));
+
+    if (q)
+      list = list.filter(c =>
+        c.name.toLowerCase().includes(q) || c.description.toLowerCase().includes(q)
+      );
+
+    // show/hide clear button
+    const hasFilter = activeStage || activeLocation || activeTag || q;
+    document.getElementById("clearBtn").style.display = hasFilter ? "inline-flex" : "none";
+
+    // active filter chips in stats bar
+    const chips = [];
+    if (activeStage)    chips.push(activeStage);
+    if (activeLocation) chips.push("📍 " + activeLocation);
+    if (activeTag)      chips.push(activeTag);
+    document.getElementById("activeFilters").innerHTML =
+      chips.map(ch => `<span class="active-chip">${escHtml(ch)}</span>`).join("");
 
     document.getElementById("count").textContent = list.length;
     const grid = document.getElementById("grid");
@@ -301,6 +419,16 @@
       return;
     }
     grid.innerHTML = list.map((c, i) => cardHTML(c, i)).join("");
+  }
+
+  // ── Clear all filters ────────────────────────────────────────────────────
+  function clearFilters() {
+    activeTag = activeStage = activeLocation = null;
+    document.getElementById("search").value = "";
+    document.querySelectorAll(".pill").forEach(b => {
+      b.classList.toggle("active", b.dataset.value === "");
+    });
+    renderCompanies();
   }
 
   function fundingStageLabel(funding) {
