@@ -1,0 +1,21 @@
+[Unit]
+Description=AI Companies Tracker — Flask + Gunicorn
+After=network.target
+
+[Service]
+User=ubuntu
+Group=ubuntu
+WorkingDirectory=/home/ubuntu/ai-tracker
+Environment="PATH=/home/ubuntu/ai-tracker/venv/bin"
+ExecStart=/home/ubuntu/ai-tracker/venv/bin/gunicorn \
+    --workers 1 \
+    --bind 127.0.0.1:5000 \
+    --timeout 120 \
+    --access-logfile - \
+    --error-logfile - \
+    wsgi:app
+Restart=always
+RestartSec=5
+
+[Install]
+WantedBy=multi-user.target
