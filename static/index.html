@@ -6,15 +6,15 @@
   <title>AI Companies Tracker</title>
   <style>
     :root {
-      --bg:        #09090f;
-      --surface:   #111118;
-      --border:    #1e1e2e;
-      --text:      #e2e2f0;
-      --muted:     #7c7c9a;
-      --accent:    #7c5cfc;
-      --accent2:   #00d2ff;
-      --green:     #22d07a;
-      --orange:    #ff8c42;
+      --bg:        #f4f6fb;
+      --surface:   #ffffff;
+      --border:    #e2e6f0;
+      --text:      #1a1a2e;
+      --muted:     #6b7280;
+      --accent:    #6141e0;
+      --accent2:   #0099cc;
+      --green:     #0f9d58;
+      --orange:    #e07b20;
       --radius:    12px;
       --card-w:    320px;
     }
@@ -23,10 +23,11 @@
 
     /* ── Header ── */
     header {
-      background: linear-gradient(135deg, #0d0d1a 0%, #12103a 100%);
+      background: linear-gradient(135deg, #ffffff 0%, #eef0ff 100%);
       border-bottom: 1px solid var(--border);
       padding: 20px 32px;
       display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 12px;
+      box-shadow: 0 1px 6px rgba(0,0,0,.06);
     }
     .logo { display: flex; align-items: center; gap: 10px; }
     .logo-dot {
@@ -40,7 +41,7 @@
     .header-right { display: flex; align-items: center; gap: 16px; flex-wrap: wrap; }
     .status-pill {
       display: flex; align-items: center; gap: 6px;
-      background: rgba(34,208,122,.12); border: 1px solid rgba(34,208,122,.25);
+      background: rgba(15,157,88,.1); border: 1px solid rgba(15,157,88,.3);
       border-radius: 20px; padding: 5px 12px; font-size: 12px; color: var(--green);
     }
     .dot-live { width: 7px; height: 7px; border-radius: 50%; background: var(--green); animation: pulse 2s infinite; }
@@ -101,22 +102,23 @@
       padding: 20px; display: flex; flex-direction: column; gap: 12px;
       transition: transform .18s, border-color .18s, box-shadow .18s;
       animation: fadeIn .35s ease both;
+      box-shadow: 0 2px 8px rgba(0,0,0,.05);
     }
     .card:hover {
       transform: translateY(-3px);
-      border-color: rgba(124,92,252,.4);
-      box-shadow: 0 8px 30px rgba(0,0,0,.4);
+      border-color: rgba(97,65,224,.35);
+      box-shadow: 0 8px 24px rgba(97,65,224,.12);
     }
     @keyframes fadeIn { from{opacity:0;transform:translateY(8px);} to{opacity:1;transform:none;} }
 
     .card-header { display: flex; justify-content: space-between; align-items: flex-start; gap: 10px; }
     .company-name { font-size: 1rem; font-weight: 700; letter-spacing: -0.2px; }
     .valuation {
-      background: rgba(34,208,122,.1); border: 1px solid rgba(34,208,122,.2);
+      background: rgba(15,157,88,.08); border: 1px solid rgba(15,157,88,.25);
       color: var(--green); border-radius: 7px; padding: 3px 8px;
       font-size: 11px; font-weight: 700; white-space: nowrap; flex-shrink: 0;
     }
-    .valuation.unknown { background: rgba(124,92,252,.08); border-color: rgba(124,92,252,.2); color: var(--muted); }
+    .valuation.unknown { background: rgba(97,65,224,.06); border-color: rgba(97,65,224,.2); color: var(--muted); }
     .description { font-size: 13px; color: var(--muted); line-height: 1.55; flex: 1; }
 
     /* ── Tags ── */
@@ -130,11 +132,11 @@
     .hq { font-size: 11px; color: var(--muted); }
     .visit-btn {
       font-size: 12px; font-weight: 600; color: var(--accent); text-decoration: none;
-      background: rgba(124,92,252,.1); border: 1px solid rgba(124,92,252,.25);
+      background: rgba(97,65,224,.08); border: 1px solid rgba(97,65,224,.25);
       border-radius: 7px; padding: 4px 11px; transition: background .15s;
       white-space: nowrap;
     }
-    .visit-btn:hover { background: rgba(124,92,252,.25); }
+    .visit-btn:hover { background: rgba(97,65,224,.18); }
 
     /* ── Empty / Loading ── */
     .placeholder {
