@@ -1,0 +1,371 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>AI Companies Tracker</title>
+  <style>
+    :root {
+      --bg:        #09090f;
+      --surface:   #111118;
+      --border:    #1e1e2e;
+      --text:      #e2e2f0;
+      --muted:     #7c7c9a;
+      --accent:    #7c5cfc;
+      --accent2:   #00d2ff;
+      --green:     #22d07a;
+      --orange:    #ff8c42;
+      --radius:    12px;
+      --card-w:    320px;
+    }
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    body { background: var(--bg); color: var(--text); font-family: "Inter", system-ui, sans-serif; min-height: 100vh; }
+
+    /* ── Header ── */
+    header {
+      background: linear-gradient(135deg, #0d0d1a 0%, #12103a 100%);
+      border-bottom: 1px solid var(--border);
+      padding: 20px 32px;
+      display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 12px;
+    }
+    .logo { display: flex; align-items: center; gap: 10px; }
+    .logo-dot {
+      width: 34px; height: 34px; border-radius: 9px;
+      background: linear-gradient(135deg, var(--accent), var(--accent2));
+      display: flex; align-items: center; justify-content: center;
+      font-size: 18px; font-weight: 900; color: #fff;
+    }
+    h1 { font-size: 1.25rem; font-weight: 700; letter-spacing: -0.3px; }
+    h1 span { color: var(--accent); }
+    .header-right { display: flex; align-items: center; gap: 16px; flex-wrap: wrap; }
+    .status-pill {
+      display: flex; align-items: center; gap: 6px;
+      background: rgba(34,208,122,.12); border: 1px solid rgba(34,208,122,.25);
+      border-radius: 20px; padding: 5px 12px; font-size: 12px; color: var(--green);
+    }
+    .dot-live { width: 7px; height: 7px; border-radius: 50%; background: var(--green); animation: pulse 2s infinite; }
+    @keyframes pulse { 0%,100%{opacity:1;} 50%{opacity:.3;} }
+    .refresh-btn {
+      background: var(--accent); color: #fff; border: none; border-radius: 8px;
+      padding: 7px 16px; font-size: 13px; font-weight: 600; cursor: pointer;
+      transition: opacity .15s;
+    }
+    .refresh-btn:hover { opacity: .85; }
+    .refresh-btn:disabled { opacity: .4; cursor: default; }
+    #countdown { font-size: 12px; color: var(--muted); }
+
+    /* ── Controls ── */
+    .controls {
+      padding: 20px 32px 0;
+      display: flex; align-items: center; gap: 12px; flex-wrap: wrap;
+    }
+    .search-wrap { position: relative; flex: 1; min-width: 200px; max-width: 380px; }
+    .search-wrap svg { position: absolute; left: 11px; top: 50%; transform: translateY(-50%); opacity: .45; }
+    #search {
+      width: 100%; padding: 9px 12px 9px 36px;
+      background: var(--surface); border: 1px solid var(--border); border-radius: 9px;
+      color: var(--text); font-size: 14px; outline: none;
+      transition: border-color .2s;
+    }
+    #search:focus { border-color: var(--accent); }
+    #search::placeholder { color: var(--muted); }
+    .tag-filters { display: flex; gap: 7px; flex-wrap: wrap; }
+    .tag-btn {
+      padding: 5px 12px; border-radius: 20px; font-size: 12px; font-weight: 500; cursor: pointer;
+      border: 1px solid var(--border); background: var(--surface); color: var(--muted);
+      transition: all .15s;
+    }
+    .tag-btn:hover { border-color: var(--accent); color: var(--text); }
+    .tag-btn.active { background: var(--accent); border-color: var(--accent); color: #fff; }
+
+    /* ── Stats bar ── */
+    .stats-bar {
+      padding: 12px 32px;
+      display: flex; align-items: center; gap: 20px;
+      font-size: 13px; color: var(--muted);
+      border-bottom: 1px solid var(--border);
+    }
+    .stats-bar strong { color: var(--text); }
+    #last-updated { margin-left: auto; }
+
+    /* ── Grid ── */
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(var(--card-w), 1fr));
+      gap: 20px; padding: 24px 32px 40px;
+    }
+
+    /* ── Card ── */
+    .card {
+      background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius);
+      padding: 20px; display: flex; flex-direction: column; gap: 12px;
+      transition: transform .18s, border-color .18s, box-shadow .18s;
+      animation: fadeIn .35s ease both;
+    }
+    .card:hover {
+      transform: translateY(-3px);
+      border-color: rgba(124,92,252,.4);
+      box-shadow: 0 8px 30px rgba(0,0,0,.4);
+    }
+    @keyframes fadeIn { from{opacity:0;transform:translateY(8px);} to{opacity:1;transform:none;} }
+
+    .card-header { display: flex; justify-content: space-between; align-items: flex-start; gap: 10px; }
+    .company-name { font-size: 1rem; font-weight: 700; letter-spacing: -0.2px; }
+    .valuation {
+      background: rgba(34,208,122,.1); border: 1px solid rgba(34,208,122,.2);
+      color: var(--green); border-radius: 7px; padding: 3px 8px;
+      font-size: 11px; font-weight: 700; white-space: nowrap; flex-shrink: 0;
+    }
+    .valuation.unknown { background: rgba(124,92,252,.08); border-color: rgba(124,92,252,.2); color: var(--muted); }
+    .description { font-size: 13px; color: var(--muted); line-height: 1.55; flex: 1; }
+
+    /* ── Tags ── */
+    .tags { display: flex; flex-wrap: wrap; gap: 5px; }
+    .tag {
+      padding: 3px 9px; border-radius: 20px; font-size: 11px; font-weight: 500;
+      border: 1px solid;
+    }
+    .card-footer { display: flex; align-items: center; justify-content: space-between; gap: 8px; margin-top: 4px; }
+    .funding { font-size: 12px; color: var(--orange); display: flex; align-items: center; gap: 4px; }
+    .hq { font-size: 11px; color: var(--muted); }
+    .visit-btn {
+      font-size: 12px; font-weight: 600; color: var(--accent); text-decoration: none;
+      background: rgba(124,92,252,.1); border: 1px solid rgba(124,92,252,.25);
+      border-radius: 7px; padding: 4px 11px; transition: background .15s;
+      white-space: nowrap;
+    }
+    .visit-btn:hover { background: rgba(124,92,252,.25); }
+
+    /* ── Empty / Loading ── */
+    .placeholder {
+      grid-column: 1 / -1; display: flex; flex-direction: column; align-items: center;
+      justify-content: center; gap: 12px; padding: 80px 0; color: var(--muted);
+    }
+    .spinner {
+      width: 36px; height: 36px; border: 3px solid var(--border);
+      border-top-color: var(--accent); border-radius: 50%; animation: spin 0.8s linear infinite;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    /* ── Responsive ── */
+    @media (max-width: 600px) {
+      header, .controls, .stats-bar, .grid { padding-left: 16px; padding-right: 16px; }
+      :root { --card-w: 280px; }
+    }
+  </style>
+</head>
+<body>
+
+<header>
+  <div class="logo">
+    <div class="logo-dot">AI</div>
+    <h1>AI <span>Companies</span> Tracker</h1>
+  </div>
+  <div class="header-right">
+    <div class="status-pill">
+      <span class="dot-live"></span>
+      <span id="countdown">Refreshes in —</span>
+    </div>
+    <button class="refresh-btn" id="refreshBtn" onclick="manualRefresh()">↻ Refresh now</button>
+  </div>
+</header>
+
+<div class="controls">
+  <div class="search-wrap">
+    <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+      <circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/>
+    </svg>
+    <input id="search" type="search" placeholder="Search companies…" oninput="renderCompanies()" />
+  </div>
+  <div class="tag-filters" id="tagFilters"></div>
+</div>
+
+<div class="stats-bar">
+  <span>Showing <strong id="count">—</strong> companies</span>
+  <span id="last-updated"></span>
+</div>
+
+<main class="grid" id="grid">
+  <div class="placeholder"><div class="spinner"></div><span>Loading companies…</span></div>
+</main>
+
+<script>
+  // ── Tag colour palette ───────────────────────────────────────────────────
+  const TAG_COLORS = {
+    "LLM":                    ["#a78bfa","rgba(167,139,250,.12)"],
+    "Foundation Models":      ["#818cf8","rgba(129,140,248,.12)"],
+    "Generative AI":          ["#c084fc","rgba(192,132,252,.12)"],
+    "AI Safety":              ["#34d399","rgba(52,211,153,.12)"],
+    "MLOps / Infrastructure": ["#fb923c","rgba(251,146,60,.12)"],
+    "AI Chips / Hardware":    ["#f87171","rgba(248,113,113,.12)"],
+    "Computer Vision":        ["#2dd4bf","rgba(45,212,191,.12)"],
+    "NLP / Speech":           ["#60a5fa","rgba(96,165,250,.12)"],
+    "AI Agents":              ["#e879f9","rgba(232,121,249,.12)"],
+    "Autonomous Vehicles":    ["#fbbf24","rgba(251,191,36,.12)"],
+    "AI for Healthcare":      ["#4ade80","rgba(74,222,128,.12)"],
+    "AI for Legal":           ["#a3e635","rgba(163,230,53,.12)"],
+    "AI for Finance":         ["#38bdf8","rgba(56,189,248,.12)"],
+    "AI Search":              ["#f472b6","rgba(244,114,182,.12)"],
+    "AI Coding":              ["#34d399","rgba(52,211,153,.12)"],
+    "Video Generation":       ["#fb7185","rgba(251,113,133,.12)"],
+    "Audio AI":               ["#a78bfa","rgba(167,139,250,.12)"],
+    "Robotics":               ["#fcd34d","rgba(252,211,77,.12)"],
+    "Open Source":            ["#6ee7b7","rgba(110,231,183,.12)"],
+    "Enterprise AI":          ["#93c5fd","rgba(147,197,253,.12)"],
+    "AI Infrastructure":      ["#fb923c","rgba(251,146,60,.12)"],
+    "Data & Labelling":       ["#a3a3a3","rgba(163,163,163,.12)"],
+    "Creative AI":            ["#f0abfc","rgba(240,171,252,.12)"],
+    "Consumer AI":            ["#67e8f9","rgba(103,232,249,.12)"],
+    "Cloud AI":               ["#7dd3fc","rgba(125,211,252,.12)"],
+    "AI Evaluation":          ["#d9f99d","rgba(217,249,157,.12)"],
+    "Research":               ["#c7d2fe","rgba(199,210,254,.12)"],
+    "Customer Service AI":    ["#86efac","rgba(134,239,172,.12)"],
+  };
+
+  function tagStyle(tag) {
+    const [color, bg] = TAG_COLORS[tag] || ["#94a3b8","rgba(148,163,184,.12)"];
+    return `style="color:${color};background:${bg};border-color:${color}44;"`;
+  }
+
+  // ── State ────────────────────────────────────────────────────────────────
+  let allCompanies = [];
+  let activeTag = null;
+  let nextRefreshAt = null;
+  let countdownInterval = null;
+
+  // ── Fetch + render ───────────────────────────────────────────────────────
+  async function fetchCompanies() {
+    try {
+      const res = await fetch("/api/companies");
+      const data = await res.json();
+      allCompanies = data.companies || [];
+
+      const meta = data.metadata || {};
+      if (meta.last_crawl) {
+        const d = new Date(meta.last_crawl);
+        document.getElementById("last-updated").textContent =
+          "Last updated: " + d.toLocaleString();
+        nextRefreshAt = new Date(d.getTime() + 60 * 60 * 1000);
+        startCountdown();
+      }
+
+      await fetchTags();
+      renderCompanies();
+    } catch (err) {
+      document.getElementById("grid").innerHTML =
+        `<div class="placeholder">⚠ Could not load data. Is the server running?</div>`;
+    }
+  }
+
+  async function fetchTags() {
+    try {
+      const res = await fetch("/api/tags");
+      const tags = await res.json();
+      const container = document.getElementById("tagFilters");
+      container.innerHTML = "";
+      const allBtn = makeTagBtn("All", null);
+      allBtn.classList.add("active");
+      container.appendChild(allBtn);
+      tags.forEach(tag => container.appendChild(makeTagBtn(tag, tag)));
+    } catch (_) {}
+  }
+
+  function makeTagBtn(label, value) {
+    const btn = document.createElement("button");
+    btn.className = "tag-btn";
+    btn.textContent = label;
+    btn.onclick = () => {
+      activeTag = value;
+      document.querySelectorAll(".tag-btn").forEach(b => b.classList.remove("active"));
+      btn.classList.add("active");
+      renderCompanies();
+    };
+    return btn;
+  }
+
+  function renderCompanies() {
+    const q = document.getElementById("search").value.toLowerCase().trim();
+    let list = allCompanies;
+    if (activeTag) list = list.filter(c => (c.tags || []).includes(activeTag));
+    if (q) list = list.filter(c =>
+      c.name.toLowerCase().includes(q) || c.description.toLowerCase().includes(q)
+    );
+
+    document.getElementById("count").textContent = list.length;
+    const grid = document.getElementById("grid");
+    if (!list.length) {
+      grid.innerHTML = `<div class="placeholder">No companies match your filter.</div>`;
+      return;
+    }
+    grid.innerHTML = list.map((c, i) => cardHTML(c, i)).join("");
+  }
+
+  function cardHTML(c, idx) {
+    const valClass = c.valuation === "Unknown" ? "valuation unknown" : "valuation";
+    const tags = (c.tags || []).map(t => `<span class="tag" ${tagStyle(t)}>${t}</span>`).join("");
+    const hq = c.hq ? `<span class="hq">📍 ${c.hq}</span>` : "";
+    const link = c.website && c.website.startsWith("http")
+      ? `<a class="visit-btn" href="${c.website}" target="_blank" rel="noopener">Visit →</a>`
+      : "";
+    return `
+      <article class="card" style="animation-delay:${idx * 0.04}s">
+        <div class="card-header">
+          <span class="company-name">${escHtml(c.name)}</span>
+          <span class="${valClass}">${escHtml(c.valuation)}</span>
+        </div>
+        <p class="description">${escHtml(c.description)}</p>
+        <div class="tags">${tags}</div>
+        <div class="card-footer">
+          <div>
+            <div class="funding">💰 ${escHtml(c.last_funding)}</div>
+            ${hq}
+          </div>
+          ${link}
+        </div>
+      </article>`;
+  }
+
+  function escHtml(s) {
+    return String(s || "")
+      .replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;")
+      .replace(/"/g,"&quot;").replace(/'/g,"&#39;");
+  }
+
+  // ── Manual refresh ───────────────────────────────────────────────────────
+  async function manualRefresh() {
+    const btn = document.getElementById("refreshBtn");
+    btn.disabled = true;
+    btn.textContent = "Refreshing…";
+    try {
+      await fetch("/api/refresh", { method: "POST" });
+      await fetchCompanies();
+    } finally {
+      btn.disabled = false;
+      btn.textContent = "↻ Refresh now";
+    }
+  }
+
+  // ── Countdown timer ──────────────────────────────────────────────────────
+  function startCountdown() {
+    if (countdownInterval) clearInterval(countdownInterval);
+    countdownInterval = setInterval(() => {
+      if (!nextRefreshAt) return;
+      const diff = nextRefreshAt - Date.now();
+      if (diff <= 0) {
+        document.getElementById("countdown").textContent = "Refreshing…";
+        clearInterval(countdownInterval);
+        fetchCompanies();
+        return;
+      }
+      const m = Math.floor(diff / 60000);
+      const s = Math.floor((diff % 60000) / 1000);
+      document.getElementById("countdown").textContent =
+        `Refreshes in ${m}m ${String(s).padStart(2,"0")}s`;
+    }, 1000);
+  }
+
+  // ── Boot ─────────────────────────────────────────────────────────────────
+  fetchCompanies();
+</script>
+</body>
+</html>
