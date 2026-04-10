@@ -119,6 +119,7 @@
       font-size: 11px; font-weight: 700; white-space: nowrap; flex-shrink: 0;
     }
     .valuation.unknown { background: rgba(97,65,224,.06); border-color: rgba(97,65,224,.2); color: var(--muted); }
+    .valuation.bootstrapped { background: rgba(251,146,60,.08); border-color: rgba(251,146,60,.3); color: var(--orange); }
     .description { font-size: 13px; color: var(--muted); line-height: 1.55; flex: 1; }
 
     /* ── Tags ── */
@@ -302,17 +303,43 @@
     grid.innerHTML = list.map((c, i) => cardHTML(c, i)).join("");
   }
 
+  function fundingStageLabel(funding) {
+    if (!funding) return null;
+    const f = funding.toLowerCase();
+    if (f.includes("bootstrapped") || f.includes("no vc")) return { label: "Bootstrapped", color: "#e07b20" };
+    if (f.includes("no disclosed"))                          return { label: "Undisclosed",  color: "#6b7280" };
+    if (f.includes("seed"))                                  return { label: "Seed",         color: "#8b5cf6" };
+    if (f.includes("series a"))                              return { label: "Series A",     color: "#3b82f6" };
+    if (f.includes("series b"))                              return { label: "Series B",     color: "#0ea5e9" };
+    if (f.includes("series c"))                              return { label: "Series C",     color: "#06b6d4" };
+    if (f.includes("series d") || f.includes("series e") || f.includes("series f"))
+                                                             return { label: "Late Stage",   color: "#0f9d58" };
+    if (f.includes("pre-ipo") || f.includes("ipo"))         return { label: "Pre-IPO",      color: "#f59e0b" };
+    return null;
+  }
+
   function cardHTML(c, idx) {
-    const valClass = c.valuation === "Unknown" ? "valuation unknown" : "valuation";
+    const v = c.valuation || "";
+    const valClass = v === "Unknown" || v === "N/A" || v === "Undisclosed"
+      ? "valuation unknown"
+      : v.toLowerCase().includes("arr") || v.toLowerCase().includes("profitable")
+        ? "valuation bootstrapped"
+        : "valuation";
     const tags = (c.tags || []).map(t => `<span class="tag" ${tagStyle(t)}>${t}</span>`).join("");
     const hq = c.hq ? `<span class="hq">📍 ${c.hq}</span>` : "";
     const link = c.website && c.website.startsWith("http")
       ? `<a class="visit-btn" href="${c.website}" target="_blank" rel="noopener">Visit →</a>`
       : "";
+    const stage = fundingStageLabel(c.last_funding);
+    const stageBadge = stage
+      ? `<span style="font-size:10px;font-weight:700;padding:2px 7px;border-radius:20px;
+           background:${stage.color}18;border:1px solid ${stage.color}44;color:${stage.color};
+           margin-left:6px;">${stage.label}</span>`
+      : "";
     return `
       <article class="card" style="animation-delay:${idx * 0.04}s">
         <div class="card-header">
-          <span class="company-name">${escHtml(c.name)}</span>
+          <span class="company-name">${escHtml(c.name)}${stageBadge}</span>
           <span class="${valClass}">${escHtml(c.valuation)}</span>
         </div>
         <p class="description">${escHtml(c.description)}</p>
