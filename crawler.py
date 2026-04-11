@@ -19,6 +19,7 @@ import re
 import json
 import logging
 import os
+import time
 
 logging.basicConfig(level=logging.INFO, format="%(asctime)s %(levelname)s %(message)s")
 log = logging.getLogger(__name__)
@@ -26,9 +27,33 @@ log = logging.getLogger(__name__)
 DATA_FILE = os.path.join(os.path.dirname(__file__), "data", "companies.json")
 
 RSS_FEEDS = [
+    # ── Funding & Startup News ────────────────────────────────────────────
     "https://news.crunchbase.com/feed/",
     "https://techcrunch.com/category/artificial-intelligence/feed/",
+    "https://techcrunch.com/tag/funding/feed/",
+    "https://techcrunch.com/category/startups/feed/",
+
+    # ── AI-Specific Publications ──────────────────────────────────────────
     "https://venturebeat.com/category/ai/feed/",
+    "https://artificialintelligence-news.com/feed/",
+    "https://aibusiness.com/rss.xml",
+    "https://www.theverge.com/rss/ai-artificial-intelligence/index.xml",
+    "https://www.technologyreview.com/feed/",
+    "https://www.wired.com/feed/tag/ai/rss",
+
+    # ── VC & Investor Blogs ───────────────────────────────────────────────
+    "https://a16z.com/feed/",
+    "https://www.ycombinator.com/blog/rss",
+    "https://review.firstround.com/feed.xml",
+
+    # ── General Tech (strong AI coverage) ────────────────────────────────
+    "https://feeds.arstechnica.com/arstechnica/technology-lab",
+    "https://siliconangle.com/feed/",
+    "https://feeds.reuters.com/reuters/technologyNews",
+
+    # ── AI Research & Community ───────────────────────────────────────────
+    "https://blog.research.google/feeds/posts/default",
+    "https://huggingface.co/blog/feed.xml",
 ]
 
 # ─── Data Model ──────────────────────────────────────────────────────────────
@@ -297,11 +322,17 @@ class DiscoveryAgent:
 
     def run(self) -> list[Company]:
         discovered: list[Company] = []
+        total_entries = 0
+        total_matched = 0
+
         for feed_url in RSS_FEEDS:
             try:
                 log.info(f"[DiscoveryAgent] Fetching {feed_url}")
                 feed = feedparser.parse(feed_url)
+                feed_found = 0
+
                 for entry in feed.entries:
+                    total_entries += 1
                     text = (entry.get("title", "") + " " + entry.get("summary", ""))
                     if not AI_KEYWORDS.search(text):
                         continue
@@ -323,9 +354,15 @@ class DiscoveryAgent:
                             source="rss",
                         )
                         discovered.append(c)
-                        log.info(f"[DiscoveryAgent] Found: {company_name} — ${amount}{unit}")
+                        feed_found += 1
+                        total_matched += 1
+
+                log.info(f"[DiscoveryAgent] {feed_url.split('/')[2]} → {len(feed.entries)} entries, {feed_found} AI companies found")
+                time.sleep(0.5)  # polite delay between feeds
             except Exception as e:
                 log.warning(f"[DiscoveryAgent] Feed error {feed_url}: {e}")
+
+        log.info(f"[DiscoveryAgent] Done — scanned {total_entries} entries across {len(RSS_FEEDS)} feeds, found {total_matched} AI companies")
         return discovered
 
 
