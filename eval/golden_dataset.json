@@ -1,0 +1,87 @@
+{
+  "_comment": "Ground truth used to evaluate agent output quality. Update this manually when you know the correct answer.",
+
+  "known_companies": [
+    { "name": "OpenAI",       "required_tags": ["LLM", "Foundation Models"], "required_fields": ["website", "valuation", "last_funding", "hq"] },
+    { "name": "Anthropic",    "required_tags": ["LLM", "AI Safety"],         "required_fields": ["website", "valuation", "last_funding", "hq"] },
+    { "name": "Mistral AI",   "required_tags": ["LLM", "Open Source"],       "required_fields": ["website", "valuation"] },
+    { "name": "Groq",         "required_tags": ["AI Chips / Hardware"],      "required_fields": ["website", "valuation"] },
+    { "name": "Midjourney",   "required_tags": ["Image Generation"],         "required_fields": ["website"] },
+    { "name": "Ollama",       "required_tags": ["Open Source", "LLM"],       "required_fields": ["website"] },
+    { "name": "Cursor",       "required_tags": ["AI Coding"],                "required_fields": ["website"] },
+    { "name": "ElevenLabs",   "required_tags": ["NLP / Speech"],             "required_fields": ["website", "valuation"] },
+    { "name": "Perplexity AI","required_tags": ["AI Search"],                "required_fields": ["website", "valuation"] },
+    { "name": "Scale AI",     "required_tags": ["Data & Labelling"],         "required_fields": ["website", "valuation"] }
+  ],
+
+  "discovery_fixtures": [
+    {
+      "title": "Acme AI raises $50M Series B to expand LLM platform",
+      "summary": "Acme AI, a generative AI startup, has secured $50M in Series B funding.",
+      "expected_name": "Acme AI",
+      "expected_amount": "50",
+      "expected_unit": "M",
+      "should_match": true
+    },
+    {
+      "title": "NovaBrain secures $200M Series C for autonomous AI agents",
+      "summary": "NovaBrain is building AI agents for enterprise workflows.",
+      "expected_name": "NovaBrain",
+      "expected_amount": "200",
+      "expected_unit": "M",
+      "should_match": true
+    },
+    {
+      "title": "Apple announces new iPhone 17 with better camera",
+      "summary": "The new iPhone comes with improved sensors and battery life.",
+      "expected_name": null,
+      "should_match": false
+    },
+    {
+      "title": "QuantumLeap raises $1.2B to build AI chips",
+      "summary": "QuantumLeap is developing next-gen AI semiconductor hardware.",
+      "expected_name": "QuantumLeap",
+      "expected_amount": "1.2",
+      "expected_unit": "B",
+      "should_match": true
+    }
+  ],
+
+  "classification_fixtures": [
+    {
+      "description": "Building humanoid robots powered by deep learning for warehouse automation",
+      "expected_tags": ["Robotics"]
+    },
+    {
+      "description": "AI chip startup developing wafer-scale processors for LLM training",
+      "expected_tags": ["AI Chips / Hardware"]
+    },
+    {
+      "description": "Clinical AI for radiology and medical image diagnosis",
+      "expected_tags": ["AI for Healthcare", "Computer Vision"]
+    },
+    {
+      "description": "Open-source vector database for semantic search and RAG pipelines",
+      "expected_tags": ["AI Infrastructure", "Open Source"]
+    },
+    {
+      "description": "AI coding assistant and IDE for software engineers",
+      "expected_tags": ["AI Coding"]
+    }
+  ],
+
+  "deduplication_fixtures": [
+    {
+      "scenario": "seed beats rss",
+      "seed": { "id": "openai", "name": "OpenAI", "source": "seed", "valuation": "$157B" },
+      "incoming": { "id": "openai", "name": "OpenAI", "source": "rss", "valuation": "Unknown" },
+      "expected_valuation": "$157B"
+    },
+    {
+      "scenario": "richer description wins",
+      "seed": { "id": "acme_ai", "name": "Acme AI", "source": "rss", "description": "AI company." },
+      "incoming": { "id": "acme_ai", "name": "Acme AI", "source": "rss", "description": "Acme AI builds enterprise LLMs for Fortune 500 companies with a focus on accuracy." },
+      "expected_description_min_len": 60
+    }
+  ]
+}
